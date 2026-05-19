@@ -67,9 +67,13 @@ cat > "$OUT/index.html" <<'EOF'
         // wasm-bindgen's --target web `init()` only runs the externref-table
         // setup via `__wbindgen_start`; for a Rust `bin` crate we still have
         // to invoke `main()` ourselves. Trunk does this implicitly; we don't.
+        // `main` is exported with the C signature `int main(int argc, char**
+        // argv)` — on wasm64 `argv` is `i64`, so we must pass a BigInt instead
+        // of letting `undefined` slide through (which would have worked on
+        // wasm32 with `i32`).
         import init from "./app.js";
         init()
-            .then((wasm) => { wasm.main(); })
+            .then((wasm) => { wasm.main(0, 0n); })
             .catch((err) => {
                 console.error("smt-scope init failed:", err);
                 const parts = [
