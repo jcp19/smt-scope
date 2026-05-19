@@ -145,9 +145,11 @@ impl PartialEq for ParseInfo {
 }
 
 impl Homepage {
-    #[cfg(not(feature = "tauri"))]
+    // The cap exists because wasm32 linear memory is u32-indexed (~4 GiB total).
+    // On wasm64 or Tauri there's no equivalent ceiling, so we don't impose one.
+    #[cfg(all(not(feature = "tauri"), target_arch = "wasm32"))]
     const BROWSER_MEM_LIMIT: usize = 2 * 1024 * 1024 * 1024;
-    #[cfg(feature = "tauri")]
+    #[cfg(any(feature = "tauri", not(target_arch = "wasm32")))]
     const BROWSER_MEM_LIMIT: usize = usize::MAX;
 
     pub(super) fn file_drag(registerer: &GlobalCallbacks, link: &Scope<Self>) -> [CallbackRef; 3] {

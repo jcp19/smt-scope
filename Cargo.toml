@@ -12,3 +12,8 @@ resolver = "2"
 
 [profile.test]
 opt-level = 3
+
+# Local forks of getrandom with the `wasm_js` backend extended to wasm64.
+# Upstream's check rejects wasm64 outright; the only change is the cfg gate.
+[patch.crates-io]
+getrandom = { path = "vendor/getrandom-0.3-wasm64" }
