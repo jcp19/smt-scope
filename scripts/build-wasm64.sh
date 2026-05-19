@@ -72,10 +72,21 @@ cat > "$OUT/index.html" <<'EOF'
             .then((wasm) => { wasm.main(); })
             .catch((err) => {
                 console.error("smt-scope init failed:", err);
+                const parts = [
+                    "smt-scope failed to start.",
+                    "",
+                    "name:    " + (err && err.name),
+                    "message: " + (err && err.message),
+                    "string:  " + String(err),
+                    "type:    " + typeof err,
+                    "ctor:    " + (err && err.constructor && err.constructor.name),
+                    "",
+                    "stack:",
+                    (err && err.stack) || "(none)",
+                ];
                 document.body.innerHTML =
-                    "<pre style='color:#b00020;white-space:pre-wrap;padding:1rem;font:14px/1.4 ui-monospace,monospace'>"
-                    + "smt-scope failed to start.\n\n"
-                    + (err && err.stack ? err.stack : String(err))
+                    "<pre style='color:#b00020;white-space:pre-wrap;padding:1rem;font:13px/1.4 ui-monospace,monospace'>"
+                    + parts.join("\n").replace(/[&<>]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c])
                     + "</pre>";
             });
     </script>
