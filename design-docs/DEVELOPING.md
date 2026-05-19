@@ -30,10 +30,15 @@ cargo tauri dev
 
 The default browser build targets `wasm32-unknown-unknown`, whose linear memory
 is `u32`-indexed and so caps trace parsing at ~2 GiB. To process larger traces
-in-browser we can target `wasm64-unknown-unknown` (the WebAssembly `memory64`
-proposal). This is a Rust tier-3 target, so it requires nightly Rust and
-`-Z build-std`, plus a small patch to `getrandom` (vendored under `vendor/`)
-because upstream gates its `wasm_js` backend on `target_arch = "wasm32"`.
+we can target `wasm64-unknown-unknown` (the WebAssembly `memory64` proposal).
+This is a Rust tier-3 target, so it requires nightly Rust and `-Z build-std`,
+plus a small patch to `getrandom` (vendored under `vendor/`) because upstream
+gates its `wasm_js` backend on `target_arch = "wasm32"`.
+
+Engine support: as of May 2026, `memory64` ships unflagged in **Firefox** and
+**Chromium-based browsers** (Chrome, Edge). WebKit/JavaScriptCore has not yet
+shipped it, so this build does **not** run in Safari, in iOS browsers, or in
+any Tauri webview (Tauri uses WKWebView on macOS and webkit2gtk on Linux).
 
 Prerequisites:
 
@@ -43,14 +48,23 @@ rustup +nightly component add rust-src
 cargo install wasm-bindgen-cli --version 0.2.121 --locked
 ```
 
-Build the wasm64 GUI artifacts:
+Build the wasm64 static site:
 
 ```
-./scripts/build-wasm64.sh        # produces dist/wasm64/{app,worker}_bg.wasm + JS glue
+./scripts/build-wasm64.sh
 ```
 
-Browser support: `memory64` ships unflagged in current Chrome, Firefox and
-Safari. The Tauri desktop wrapper inherits the system WebView's support.
+This produces `dist/wasm64/` containing `index.html`, the wasm-bindgen JS
+glue, the wasm modules, and the copied static assets. Serve it locally and
+open in Firefox or Chrome:
+
+```
+python3 -m http.server -d dist/wasm64 8000
+# then open http://localhost:8000/
+```
+
+To sanity-check whether a given browser supports memory64, open
+`scripts/memory64-probe.html` in it.
 
 ## Profiling
 
