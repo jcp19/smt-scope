@@ -64,15 +64,20 @@ cat > "$OUT/index.html" <<'EOF'
 </head>
 <body>
     <script type="module">
+        // wasm-bindgen's --target web `init()` only runs the externref-table
+        // setup via `__wbindgen_start`; for a Rust `bin` crate we still have
+        // to invoke `main()` ourselves. Trunk does this implicitly; we don't.
         import init from "./app.js";
-        init().catch((err) => {
-            console.error("smt-scope init failed:", err);
-            document.body.innerHTML =
-                "<pre style='color:#b00020;white-space:pre-wrap;padding:1rem;font:14px/1.4 ui-monospace,monospace'>"
-                + "smt-scope failed to start.\n\n"
-                + (err && err.stack ? err.stack : String(err))
-                + "</pre>";
-        });
+        init()
+            .then((wasm) => { wasm.main(); })
+            .catch((err) => {
+                console.error("smt-scope init failed:", err);
+                document.body.innerHTML =
+                    "<pre style='color:#b00020;white-space:pre-wrap;padding:1rem;font:14px/1.4 ui-monospace,monospace'>"
+                    + "smt-scope failed to start.\n\n"
+                    + (err && err.stack ? err.stack : String(err))
+                    + "</pre>";
+            });
     </script>
 </body>
 </html>
