@@ -65,7 +65,14 @@ cat > "$OUT/index.html" <<'EOF'
 <body>
     <script type="module">
         import init from "./app.js";
-        init();
+        init().catch((err) => {
+            console.error("smt-scope init failed:", err);
+            document.body.innerHTML =
+                "<pre style='color:#b00020;white-space:pre-wrap;padding:1rem;font:14px/1.4 ui-monospace,monospace'>"
+                + "smt-scope failed to start.\n\n"
+                + (err && err.stack ? err.stack : String(err))
+                + "</pre>";
+        });
     </script>
 </body>
 </html>
