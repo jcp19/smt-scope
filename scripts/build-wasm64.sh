@@ -17,10 +17,14 @@ OUT="${OUT:-$ROOT/dist/wasm64}"
 cd "$ROOT/smt-scope-gui"
 
 for bin in app worker; do
+    # `tauri` here means "self-hosted build" — it disables the ChannelSelect
+    # version widget, which calls chrono::Utc::now() and panics on wasm64
+    # because chrono's wasmbind backend is `cfg(target_arch = "wasm32")` only.
     rustup run nightly cargo build \
         --target "$TARGET" \
         -Z build-std=std,panic_abort \
         --bin "$bin" \
+        --features tauri \
         --profile "$PROFILE"
 done
 
