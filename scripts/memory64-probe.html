@@ -1,0 +1,49 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>WebAssembly memory64 probe</title>
+<style>
+  body { font: 16px/1.4 system-ui, sans-serif; max-width: 36rem; margin: 2rem auto; padding: 0 1rem; }
+  pre { background: #f4f4f4; padding: 0.6rem; border-radius: 4px; overflow-x: auto; }
+  .ok { color: #0a7a25; font-weight: 600; }
+  .bad { color: #b00020; font-weight: 600; }
+</style>
+<h1>memory64 support probe</h1>
+<p>Loads a 13-byte WebAssembly module whose only feature is an
+<code>i64</code>-indexed memory. If the host engine supports the
+<a href="https://github.com/WebAssembly/memory64">memory64</a> proposal,
+both <code>validate</code> and <code>instantiate</code> succeed.</p>
+<p>User agent: <code id="ua"></code></p>
+<h2>Result</h2>
+<pre id="out">running…</pre>
+<script>
+document.getElementById("ua").textContent = navigator.userAgent;
+const out = document.getElementById("out");
+const log = (line, cls) => {
+  const span = document.createElement("span");
+  if (cls) span.className = cls;
+  span.textContent = line + "\n";
+  out.appendChild(span);
+};
+out.textContent = "";
+
+const bytes = new Uint8Array([
+  0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
+  0x05, 0x03, 0x01, 0x04, 0x01,
+]);
+
+try {
+  const ok = WebAssembly.validate(bytes);
+  log("WebAssembly.validate(memory64): " + ok, ok ? "ok" : "bad");
+  if (!ok) throw new Error("validate returned false");
+  const mod = new WebAssembly.Module(bytes);
+  const inst = new WebAssembly.Instance(mod);
+  const mem = inst.exports.memory || mod;
+  log("WebAssembly.Instance(memory64): ok", "ok");
+  log("");
+  log("Result: memory64 IS supported on this engine.", "ok");
+} catch (e) {
+  log("");
+  log("Result: memory64 is NOT supported on this engine.", "bad");
+  log("Error: " + (e && e.message ? e.message : String(e)));
+}
+</script>
