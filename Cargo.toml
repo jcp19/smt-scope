@@ -13,7 +13,9 @@ resolver = "2"
 [profile.test]
 opt-level = 3
 
-# Local forks of getrandom with the `wasm_js` backend extended to wasm64.
-# Upstream's check rejects wasm64 outright; the only change is the cfg gate.
+# Local forks of getrandom and wasm-timer with the `wasm_js` and wasm time
+# backends extended to wasm64. Upstream's cfgs reject wasm64 outright; the
+# only change in each is the cfg gate.
 [patch.crates-io]
 getrandom = { path = "vendor/getrandom-0.3-wasm64" }
+wasm-timer = { path = "vendor/wasm-timer-wasm64" }
